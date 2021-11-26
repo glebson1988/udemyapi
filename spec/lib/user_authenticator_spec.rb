@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 describe UserAuthenticator do
   describe '#perform' do
-
     let(:authenticator) { described_class.new('sample_code') }
 
     subject { authenticator.perform }

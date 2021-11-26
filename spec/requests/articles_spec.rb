@@ -18,10 +18,10 @@ RSpec.describe ArticlesController do
         expect(expected[:id]).to eq(article.id.to_s)
         expect(expected[:type]).to eq('article')
         expect(expected[:attributes]).to eq(
-                                           title: article.title,
-                                           content: article.content,
-                                           slug: article.slug
-                                         )
+          title: article.title,
+          content: article.content,
+          slug: article.slug
+        )
       end
     end
 
@@ -64,10 +64,10 @@ RSpec.describe ArticlesController do
         expect(json_data[:id]).to eq(article.id.to_s)
         expect(json_data[:type]).to eq('article')
         expect(json_data[:attributes]).to eq(
-                                            title: article.title,
-                                            content: article.content,
-                                            slug: article.slug
-                                          )
+          title: article.title,
+          content: article.content,
+          slug: article.slug
+        )
       end
     end
   end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe AccessTokensController, type: :controller do
@@ -5,10 +7,10 @@ RSpec.describe AccessTokensController, type: :controller do
     context 'when invalid request' do
       let(:error) do
         {
-          status: "401",
-          source: { pointer: "/code" },
-          title: "Authentication code is invalid",
-          detail: "You must provide valid code in order to exchange it for token."
+          status: '401',
+          source: { pointer: '/code' },
+          title: 'Authentication code is invalid',
+          detail: 'You must provide valid code in order to exchange it for token.'
         }
       end
 

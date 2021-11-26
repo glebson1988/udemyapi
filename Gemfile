@@ -10,11 +10,11 @@ gem 'rails', '~> 6.1.4'
 # Use postgresql as the database for Active Record
 gem 'pg', '~> 1.1'
 # Use Puma as the app server
-gem 'jsonapi-serializer'
 gem 'jsom-pagination'
 gem 'jsonapi_errors_handler'
-gem 'puma', '~> 5.0'
+gem 'jsonapi-serializer'
 gem 'octokit', '~> 4.0'
+gem 'puma', '~> 5.0'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 4.0'
 # Use Active Model has_secure_password
@@ -32,9 +32,9 @@ gem 'bootsnap', '>= 1.4.4', require: false
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: %i[mri mingw x64_mingw]
+  gem 'dotenv-rails'
   gem 'factory_bot_rails'
   gem 'rspec-rails', '~> 5.0.0'
-  gem 'dotenv-rails'
 end
 
 group :development do
