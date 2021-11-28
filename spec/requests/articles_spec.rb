@@ -2,16 +2,18 @@
 
 require 'rails_helper'
 
-RSpec.describe ArticlesController do
-  describe '#index' do
+RSpec.describe ArticlesController, type: :controller do
+  describe 'GET #index' do
+    subject { get :index }
+
     it 'returns a success response' do
-      get '/articles'
+      subject
       expect(response).to have_http_status(:ok)
     end
 
     it 'returns a proper JSON' do
       article = create :article
-      get '/articles'
+      subject
       expect(json_data.length).to eq(1)
       expected = json_data.first
       aggregate_failures do
@@ -28,30 +30,34 @@ RSpec.describe ArticlesController do
     it 'returns articles in the proper order' do
       older_article = create(:article, created_at: 1.hour.ago)
       recent_article = create(:article)
-      get '/articles'
+      subject
       ids = json_data.map { |item| item[:id].to_i }
 
       expect(ids).to eq([recent_article.id, older_article.id])
     end
 
-    it 'paginates results' do
-      article1, article2, article3 = create_list(:article, 3)
-      get '/articles', params: { page: { number: 2, size: 1 } }
-      expect(json_data.length).to eq(1)
-    end
+    context 'when paginated' do
+      subject { get :index, params: { page: { number: 2, size: 1 } } }
 
-    it 'contains pagination links in the response' do
-      article1, article2, article3 = create_list(:article, 3)
-      get '/articles', params: { page: { number: 2, size: 1 } }
-      expect(json[:links].length).to eq(5)
-      expect(json[:links].keys).to contain_exactly(:first, :prev, :next, :last, :self)
+      before { create_list(:article, 3) }
+
+      it 'paginates results' do
+        subject
+        expect(json_data.length).to eq(1)
+      end
+
+      it 'contains pagination links in the response' do
+        subject
+        expect(json[:links].length).to eq(5)
+        expect(json[:links].keys).to contain_exactly(:first, :prev, :next, :last, :self)
+      end
     end
   end
 
-  describe '#show' do
+  describe 'GET #show' do
     let(:article) { create :article }
 
-    subject { get "/articles/#{article.id}" }
+    subject { get :show, params: { id: article.id } }
 
     before { subject }
 
@@ -69,6 +75,20 @@ RSpec.describe ArticlesController do
           slug: article.slug
         )
       end
+    end
+  end
+
+  describe 'POST #create' do
+    subject { post :create }
+
+    context 'when no authorization header provided' do
+      it_behaves_like 'forbidden requests'
+    end
+
+    context 'when invalid authorization header provided' do
+      before { request.headers['authorization'] = 'Invalid token' }
+
+      it_behaves_like 'forbidden requests'
     end
   end
 end

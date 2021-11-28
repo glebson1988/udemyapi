@@ -15,6 +15,8 @@ class ArticlesController < ApplicationController
     render json: serializer.new(article)
   end
 
+  def create; end
+
   private
 
   def serializer
