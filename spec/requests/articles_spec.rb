@@ -81,14 +81,82 @@ RSpec.describe ArticlesController, type: :controller do
   describe 'POST #create' do
     subject { post :create }
 
-    context 'when no authorization header provided' do
-      it_behaves_like 'forbidden requests'
+    context 'unauthorized' do
+      context 'when no authorization header provided' do
+        it_behaves_like 'forbidden requests'
+      end
+
+      context 'when invalid authorization header provided' do
+        before { request.headers['authorization'] = 'Invalid token' }
+
+        it_behaves_like 'forbidden requests'
+      end
     end
 
-    context 'when invalid authorization header provided' do
-      before { request.headers['authorization'] = 'Invalid token' }
+    context 'authorized' do
+      let(:access_token) { create :access_token }
+      before { request.headers['authorization'] = "Bearer #{access_token.token}" }
 
-      it_behaves_like 'forbidden requests'
+      context 'when invalid parameters provided' do
+        let(:invalid_attributes) do
+          {
+            data: {
+              attributes: {
+                title: '',
+                content: '',
+                slug: ''
+              }
+            }
+          }
+        end
+
+        subject { post :create, params: invalid_attributes }
+
+        it 'should return 422 status code' do
+          subject
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it 'should return proper errors' do
+          subject
+          expect(JSON.parse(response.body)).to include("Title can't be blank")
+          expect(JSON.parse(response.body)).to include("Content can't be blank")
+          expect(JSON.parse(response.body)).to include("Slug can't be blank")
+        end
+      end
+    end
+
+    context 'when success request sent' do
+      let(:access_token) { create :access_token }
+      before { request.headers['authorization'] = "Bearer #{access_token.token}" }
+
+      let(:valid_attributes) do
+        {
+          data: {
+            attributes: {
+              title: 'Awesome article',
+              content: 'Super content',
+              slug: 'awesome-article'
+            }
+          }
+        }
+      end
+
+      subject { post :create, params: valid_attributes }
+
+      it 'should have 201 status code' do
+        subject
+        expect(response).to have_http_status(:created)
+      end
+
+      it 'should have proper json body' do
+        subject
+        expect(json_data[:attributes]).to include(valid_attributes[:data][:attributes])
+      end
+
+      it 'should create the article' do
+        expect { subject }.to change { Article.count }.by(1)
+      end
     end
   end
 end
