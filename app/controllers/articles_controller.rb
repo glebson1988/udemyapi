@@ -24,13 +24,19 @@ class ArticlesController < ApplicationController
   end
 
   def update
-    article = current_user.articles.find(params[:id])
     article.update!(article_params)
     render json: serializer.new(article), status: :ok
   rescue ActiveRecord::RecordNotFound
     authorization_error
   rescue StandardError
     render json: article.errors.full_messages.to_json, status: :unprocessable_entity
+  end
+
+  def destroy
+    article.destroy
+    head :no_content
+  rescue StandardError
+    authorization_error
   end
 
   private
@@ -42,5 +48,9 @@ class ArticlesController < ApplicationController
   def article_params
     params.require(:data).require(:attributes)
           .permit(:title, :content, :slug) || ActionController::Parameters.new
+  end
+
+  def article
+    @article ||= current_user.articles.find(params[:id])
   end
 end
