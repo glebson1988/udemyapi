@@ -5,5 +5,6 @@ FactoryBot.define do
     sequence(:title) { |n| "Some title#{n}" }
     content { 'Sample content' }
     sequence(:slug) { |n| "slug#{n}" }
+    user
   end
 end

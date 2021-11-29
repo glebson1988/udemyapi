@@ -159,4 +159,99 @@ RSpec.describe ArticlesController, type: :controller do
       end
     end
   end
+
+  describe 'PUT #update' do
+    let(:user) { create :user }
+    let(:article) { create :article, user: user }
+    let(:access_token) { user.create_access_token }
+
+    subject { put :update, params: { id: article.id } }
+
+    context 'unauthorized' do
+      context 'when no authorization header provided' do
+        it_behaves_like 'forbidden requests'
+      end
+
+      context 'when invalid authorization header provided' do
+        before { request.headers['authorization'] = 'Invalid token' }
+
+        it_behaves_like 'forbidden requests'
+      end
+    end
+
+    context 'authorized' do
+      context 'when trying to update not owned article' do
+        let(:other_user) { create :user }
+        let(:other_article) { create :article, user: other_user }
+
+        subject { put :update, params: { id: other_article.id } }
+        before { request.headers['authorization'] = "Bearer #{access_token.token}" }
+
+        it_behaves_like 'forbidden requests'
+      end
+
+      context 'when invalid parameters provided' do
+        before { request.headers['authorization'] = "Bearer #{access_token.token}" }
+
+        let(:invalid_attributes) do
+          {
+            data: {
+              attributes: {
+                title: '',
+                content: '',
+                slug: ''
+              }
+            }
+          }
+        end
+
+        subject { put :update, params: invalid_attributes.merge(id: article.id) }
+
+        it 'should return 422 status code' do
+          subject
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it 'should return proper errors' do
+          subject
+          expect(JSON.parse(response.body)).to include("Title can't be blank")
+          expect(JSON.parse(response.body)).to include("Content can't be blank")
+          expect(JSON.parse(response.body)).to include("Slug can't be blank")
+        end
+      end
+
+      context 'when success request sent' do
+        before { request.headers['authorization'] = "Bearer #{access_token.token}" }
+
+        let(:valid_attributes) do
+          {
+            data: {
+              attributes: {
+                title: 'Awesome article',
+                content: 'Super content',
+                slug: 'awesome-article'
+              }
+            }
+          }
+        end
+
+        subject { put :update, params: valid_attributes.merge(id: article.id) }
+
+        it 'should have 201 status code' do
+          subject
+          expect(response).to have_http_status(:ok)
+        end
+
+        it 'should have proper json body' do
+          subject
+          expect(json_data[:attributes]).to include(valid_attributes[:data][:attributes])
+        end
+
+        it 'should update the article' do
+          subject
+          expect(article.reload.title).to eq(valid_attributes[:data][:attributes][:title])
+        end
+      end
+    end
+  end
 end
