@@ -2,7 +2,18 @@
 
 require 'rails_helper'
 
-shared_examples_for 'unauthorized requests' do
+shared_examples_for 'unauthorized standard requests' do
+  let(:authentication_error) do
+    {
+      status: '401',
+      source: { pointer: '/data/attributes/password' },
+      title: 'Invalid login or password',
+      detail: 'You must provide valid credentials in order to exchange them for token.'
+    }
+  end
+end
+
+shared_examples_for 'unauthorized oauth requests' do
   let(:authentication_error) do
     {
       status: '401',

@@ -4,7 +4,7 @@ class AccessTokensController < ApplicationController
   skip_before_action :authorize!, only: :create
 
   def create
-    authenticator = UserAuthenticator.new(params[:code])
+    authenticator = UserAuthenticator.new(authentication_params)
     authenticator.perform
 
     render json: serializer.new(authenticator.access_token), status: :created
@@ -15,6 +15,10 @@ class AccessTokensController < ApplicationController
   end
 
   private
+
+  def authentication_params
+    params.permit(:code).to_h.symbolize_keys
+  end
 
   def serializer
     AccessTokenSerializer
