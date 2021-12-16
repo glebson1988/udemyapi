@@ -3,7 +3,7 @@
 class UserAuthenticator::Oauth < UserAuthenticator
   class AuthenticationError < StandardError; end
 
-  attr_reader :user, :access_token
+  attr_reader :user
 
   def initialize(code)
     @code = code
@@ -14,11 +14,6 @@ class UserAuthenticator::Oauth < UserAuthenticator
     raise AuthenticationError if token.try(:error).present?
 
     prepare_user
-    @access_token = if user.access_token.present?
-                      user.access_token
-                    else
-                      user.create_access_token
-                    end
   end
 
   private
